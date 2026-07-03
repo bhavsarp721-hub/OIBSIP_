@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.title{
+    text-align:center;
+    color:white;
+    margin-bottom:20px;
+    font-size:24px;
+    margin-bottom:15px;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+body{
+    margin:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    background:linear-gradient(135deg,#E9ECEF,#DDE2E6,#CED4DA);
+}
+.calculator{
+    width:420px;
+    background:#1F2937;
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.25);
+}
+#display{
+    width:100%;
+    height:60px;
+    border:none;
+    border-radius:15px;
+    background:#ffffff;
+    color:#222;
+    font-size:35px;
+    font-weight:bold;
+    text-align:right;
+    padding:0 20px;
+    margin-bottom:20px;
+    box-shadow:inset 0 3px 8px rgba(0,0,0,.2);
+}
+.buttons{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+button{
+    height:70px;
+    border:none;
+    border-radius:15px;
+    font-size:28px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 15px rgba(0,0,0,.25);
+}
+
+button:active{
+    transform:scale(0.95);
+}
+.number{
+    background:#f3f4f6;
+    color:#111827;
+}
+
+.number:hover{
+    background:#ffffff;
+}
+
+.operator{
+    background:#f59e0b;
+    color:#fff;
+}
+
+.operator:hover{
+    background:#d97706;
+}
+
+.equal{
+    background:#10b981;
+    color:white;
+}
+
+.equal:hover{
+    background:#059669;
+}
+
+.clear{
+    background:#ef4444;
+    color:white;
+}
+
+.clear:hover{
+    background:#dc2626;
+}
+
+.delete{
+    background:#6366f1;
+    color:white;
+}
+
+.delete:hover{
+    background:#4338ca;
+}
+
+.decimal{
+    background:#0ea5e9;
+    color:white;
+}
+
+.decimal:hover{
+    background:#0284c7;
+}
+
+.zero{
+    grid-column:span 2;
+}
+</style>
+
+</head>
+<body>
+
+<div class="calculator">
+<h2 class="title">Calculator</h2>
+<input type="text" id="display" placeholder="0" readonly>
+
+
+<div class="buttons">
+
+<button class="clear">C</button>
+<button class="delete">⌫</button>
+<button class="operator">/</button>
+<button class="operator">*</button>
+
+<button class="number">7</button>
+<button class="number">8</button>
+<button class="number">9</button>
+<button class="operator">-</button>
+
+<button class="number">4</button>
+<button class="number">5</button>
+<button class="number">6</button>
+<button class="operator">+</button>
+
+<button class="number">1</button>
+<button class="number">2</button>
+<button class="number">3</button>
+<button class="equal">=</button>
+
+<button class="number zero">0</button>
+<button class="decimal">.</button>
+
+</div>
+
+</div>
+
+<script>
+
+const display = document.getElementById("display");
+
+const numberButtons = document.querySelectorAll(".number");
+const operatorButtons = document.querySelectorAll(".operator");
+
+const equalBtn = document.querySelector(".equal");
+const clearBtn = document.querySelector(".clear");
+const deleteBtn = document.querySelector(".delete");
+const decimalBtn = document.querySelector(".decimal");
+
+let firstNumber = "";
+let secondNumber = "";
+let operator = "";
+let isSecondNumber = false;
+
+// Number Buttons
+numberButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        if(display.value==="Cannot divide by zero"){
+            clearCalculator();
+        }
+
+        if(!isSecondNumber){
+
+            firstNumber += button.textContent;
+            display.value = firstNumber;
+
+        }else{
+
+            secondNumber += button.textContent;
+            display.value = firstNumber + " " + operator + " " + secondNumber;
+
+        }
+
+    });
+
+});
+
+// Decimal
+decimalBtn.addEventListener("click",()=>{
+
+    if(!isSecondNumber){
+
+        if(!firstNumber.includes(".")){
+
+            if(firstNumber===""){
+                firstNumber="0";
+            }
+
+            firstNumber+=".";
+            display.value=firstNumber;
+
+        }
+
+    }else{
+
+        if(!secondNumber.includes(".")){
+
+            if(secondNumber===""){
+                secondNumber="0";
+            }
+
+            secondNumber+=".";
+            display.value=firstNumber+" "+operator+" "+secondNumber;
+
+        }
+
+    }
+
+});
+
+// Operators
+operatorButtons.forEach(button=>{
+
+    button.addEventListener("click",()=>{
+
+        if(firstNumber==="") return;
+
+        if(secondNumber!==""){
+
+            let result=calculate(parseFloat(firstNumber),parseFloat(secondNumber),operator);
+
+            if(result==="Error"){
+
+                display.value="Cannot divide by zero";
+                clearCalculator();
+                return;
+
+            }
+
+            firstNumber=result.toString();
+            secondNumber="";
+
+        }
+
+        operator=button.textContent;
+        isSecondNumber=true;
+
+        display.value=firstNumber+" "+operator;
+
+    });
+
+});
+
+// Equal
+equalBtn.addEventListener("click",()=>{
+
+    if(firstNumber==="" || secondNumber==="" || operator==="")
+        return;
+
+    let result=calculate(parseFloat(firstNumber),parseFloat(secondNumber),operator);
+
+    if(result==="Error"){
+
+        display.value="Cannot divide by zero";
+
+    }else{
+
+        display.value=result;
+
+    }
+
+    clearValues();
+
+});
+
+// Clear
+clearBtn.addEventListener("click",()=>{
+
+    clearCalculator();
+
+});
+
+// Delete
+deleteBtn.addEventListener("click",()=>{
+
+    if(!isSecondNumber){
+
+        firstNumber=firstNumber.slice(0,-1);
+        display.value=firstNumber;
+
+    }else{
+
+        if(secondNumber.length>0){
+
+            secondNumber=secondNumber.slice(0,-1);
+            display.value=firstNumber+" "+operator+" "+secondNumber;
+
+        }else{
+
+            operator="";
+            isSecondNumber=false;
+            display.value=firstNumber;
+
+        }
+
+    }
+
+});
+
+// Calculate
+function calculate(num1,num2,op){
+
+    switch(op){
+
+        case "+":
+            return num1+num2;
+
+        case "-":
+            return num1-num2;
+
+        case "*":
+            return num1*num2;
+
+        case "/":
+
+            if(num2===0){
+                return "Error";
+            }
+
+            return num1/num2;
+
+        default:
+            return num2;
+
+    }
+
+}
+
+// Reset after =
+function clearValues(){
+
+    firstNumber="";
+    secondNumber="";
+    operator="";
+    isSecondNumber=false;
+
+}
+
+// Clear button
+function clearCalculator(){
+
+    firstNumber="";
+    secondNumber="";
+    operator="";
+    isSecondNumber=false;
+    display.value="";
+
+}
+
+</script>
+
+</body>
+</html>
